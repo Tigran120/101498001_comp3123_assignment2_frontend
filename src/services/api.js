@@ -69,5 +69,9 @@ export const deleteEmployee = (id) => {
   return api.delete(`/employees/${id}`);
 };
 
+export const searchEmployees = (searchTerm) => {
+  return api.get(`/employees?search=${encodeURIComponent(searchTerm)}`);
+};
+
 export default api;
 

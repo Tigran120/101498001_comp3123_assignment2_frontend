@@ -13,22 +13,30 @@ import {
   TableRow,
   Box,
   AppBar,
-  Toolbar
+  Toolbar,
+  TextField,
+  InputAdornment
 } from '@mui/material';
-import { Logout as LogoutIcon } from '@mui/icons-material';
+import { Logout as LogoutIcon, Search as SearchIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import { getEmployees, deleteEmployee } from '../services/api';
+import { getEmployees, deleteEmployee, searchEmployees } from '../services/api';
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (search = '') => {
     try {
       setLoading(true);
-      const response = await getEmployees();
+      let response;
+      if (search && search.trim() !== '') {
+        response = await searchEmployees(search);
+      } else {
+        response = await getEmployees();
+      }
       setEmployees(response.data);
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -38,8 +46,8 @@ const EmployeeList = () => {
   };
 
   useEffect(() => {
-    fetchEmployees();
-  }, []);
+    fetchEmployees(searchTerm);
+  }, [searchTerm]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this employee?')) {
@@ -77,7 +85,7 @@ const EmployeeList = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
         <Button
           variant="contained"
           color="primary"
@@ -85,6 +93,22 @@ const EmployeeList = () => {
         >
           Add Employee
         </Button>
+        <TextField
+          label="Search Employees"
+          variant="outlined"
+          size="small"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by name or email..."
+          sx={{ flexGrow: 1, maxWidth: 400 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
       </Box>
 
       <TableContainer component={Paper}>
